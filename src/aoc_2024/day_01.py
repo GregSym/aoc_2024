@@ -1,6 +1,6 @@
 from aoc_2022.utils.day_handler import DayInterface
 from aoc_2022.utils.transforms import DataTransforms
-from aoc_2024.aoc_2024 import sum_as_string
+from aoc_2024.aoc_2024 import solve_day_01_pt_02
 import pytest
 
 test_input = """3   4
@@ -35,13 +35,14 @@ def test_day_1_part_1(input: str) -> None:
     assert 11 == solve_day(input)
 
 
-# def test_day_1_part_2(input: str) -> None:
-#    # test solution to part 2
-#    assert 19 == solve_day(input)
+def test_day_1_part_2(input: str) -> None:
+   # test solution to part 2
+   assert 31 == solve_day_01_pt_02(input), f"{solve_day_01_pt_02(input)=}"
 
 
 if __name__ == "__main__":
     real_input = DayInterface(1).get_day()
     test_day_1_part_1(test_input)
-    # test_day_1_part_2(test_input)
-    print(DayInterface(1).submit_day(solve_day(real_input)))
+    test_day_1_part_2(test_input)
+    # print(DayInterface(1).submit_day(solve_day(real_input)))
+    print(DayInterface(2).submit_day(solve_day_01_pt_02(input)))
