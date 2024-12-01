@@ -36,8 +36,8 @@ def test_day_1_part_1(input: str) -> None:
 
 
 def test_day_1_part_2(input: str) -> None:
-   # test solution to part 2
-   assert 31 == solve_day_01_pt_02(input), f"{solve_day_01_pt_02(input)=}"
+    # test solution to part 2
+    assert 31 == solve_day_01_pt_02(input), f"{solve_day_01_pt_02(input)=}"
 
 
 if __name__ == "__main__":
