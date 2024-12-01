@@ -1,5 +1,6 @@
 from aoc_2022.utils.day_handler import DayInterface
 from aoc_2022.utils.transforms import DataTransforms
+from aoc_2024.aoc_2024 import sum_as_string
 import pytest
 
 test_input = """3   4

@@ -1,0 +1,4 @@
+aoc_2022 @ git+https://github.com/GregSym/aoc2022.git@60da23eec1fd9b8b5f82b0aba8eb19a060babc42
+-e git+https://github.com/GregSym/aoc_2024.git@e810f1bf5ae72ff5cd8ea4b0adb13b6c3cd206cf#egg=aoc_2024
+maturin==1.7.6
+pytest==8.3.4
