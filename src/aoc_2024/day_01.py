@@ -45,4 +45,4 @@ if __name__ == "__main__":
     test_day_1_part_1(test_input)
     test_day_1_part_2(test_input)
     # print(DayInterface(1).submit_day(solve_day(real_input)))
-    print(DayInterface(2).submit_day(solve_day_01_pt_02(input)))
+    print(DayInterface(1).submit_day(solve_day_01_pt_02(real_input), part=2))

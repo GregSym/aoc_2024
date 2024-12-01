@@ -15,7 +15,11 @@ fn solve_day_01_pt_02(input: String) -> PyResult<i32> {
         l_parsed.push(pair[0].parse::<i32>().unwrap());
         r_parsed.push(pair[1].parse::<i32>().unwrap());
     }
-    Ok(0)
+    let mut tally = 0;
+    for i in l_parsed {
+        tally += i * i32::try_from(r_parsed.iter().filter(|&e| *e == i).count()).unwrap();
+    }
+    Ok(tally)
 }
 
 /// A Python module implemented in Rust.
