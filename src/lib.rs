@@ -27,20 +27,72 @@ fn solve_day_02_pt_01(input: String) -> PyResult<i32> {
     let reactor: Vec<Vec<i32>> = input
         .split_terminator("\n")
         .map(|row| {
-            row.split_terminator(" ").filter(|c| *c != "")
+            row.split_terminator(" ")
+                .filter(|c| *c != "")
                 .map(|str_num| str_num.parse::<i32>().unwrap())
                 .collect()
         })
         .collect();
     let mut tally = 0;
     for row in reactor.iter() {
-        let zipped = row
-            .iter()
-            .zip(row.clone().split_off(1));
+        let zipped = row.iter().zip(row.clone().split_off(1));
         let purely_increasing = zipped.clone().all(|(first, second)| first < &second);
         let purely_decreasing = zipped.clone().all(|(first, second)| first > &second);
-        let diff_under_eq_3 = zipped.clone().all(|(first, second)| (first - &second).abs() <= 3);
+        let diff_under_eq_3 = zipped
+            .clone()
+            .all(|(first, second)| (first - &second).abs() <= 3);
         if (purely_increasing || purely_decreasing) && diff_under_eq_3 {
+            tally += 1;
+        }
+    }
+    Ok(tally)
+}
+
+#[allow(dead_code)]
+trait InIterPop: Iterator + Clone {
+    type ResultType: Iterator<Item = Self::Item>;
+    fn chained_iter_pop(&self, index: &usize) -> impl Iterator<Item = Self::Item>;
+}
+impl<T> InIterPop for T
+where
+    T: Iterator + Clone,
+{
+    type ResultType = T;
+    fn chained_iter_pop(&self, index: &usize) -> impl Iterator<Item = Self::Item> {
+        self.clone()
+            .enumerate()
+            .filter(|(j, _)| *j != *index)
+            .map(|(_, pair)| pair)
+            .into_iter()
+    }
+}
+
+#[pyfunction]
+fn solve_day_02_pt_02(input: String) -> PyResult<i32> {
+    print!("{}", input);
+    let reactor: Vec<Vec<i32>> = input
+        .split_terminator("\n")
+        .map(|row| {
+            row.split_terminator(" ")
+                .filter(|c| *c != "")
+                .map(|str_num| str_num.parse::<i32>().unwrap())
+                .collect()
+        })
+        .collect();
+    let mut tally = 0;
+    for row in reactor.iter() {
+        let can_inc = (0..row.len()).any(|i| {
+            let mut temp_row = row.clone();
+            temp_row.remove(i);
+            let zipped = temp_row.iter().zip(temp_row.clone().split_off(1));
+            let purely_increasing = zipped.clone().all(|(first, second)| first < &second);
+            let purely_decreasing = zipped.clone().all(|(first, second)| first > &second);
+            let diff_under_eq_3 = zipped
+                .clone()
+                .all(|(first, second)| (first - &second).abs() <= 3);
+            (purely_increasing || purely_decreasing) && diff_under_eq_3
+        });
+        if can_inc {
             tally += 1;
         }
     }
@@ -53,5 +105,6 @@ fn aoc_2024(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
     m.add_function(wrap_pyfunction!(solve_day_01_pt_02, m)?)?;
     m.add_function(wrap_pyfunction!(solve_day_02_pt_01, m)?)?;
+    m.add_function(wrap_pyfunction!(solve_day_02_pt_02, m)?)?;
     Ok(())
 }
