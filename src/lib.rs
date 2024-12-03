@@ -23,6 +23,7 @@ fn solve_day_01_pt_02(input: String) -> PyResult<i32> {
     Ok(tally)
 }
 
+/// solving day 02 part 01
 #[pyfunction]
 fn solve_day_02_pt_01(input: String) -> PyResult<i32> {
     let reactor: Vec<Vec<i32>> = input
@@ -100,6 +101,15 @@ fn solve_day_02_pt_02(input: String) -> PyResult<i32> {
     Ok(tally)
 }
 
+trait HasGroup {
+    fn has_group(&self, group: &str) -> bool;
+}
+impl HasGroup for regex::Captures<'_> {
+    fn has_group(&self, group: &str) -> bool {
+        self.name(group).map_or("", |c| c.as_str()) != ""
+    }
+}
+
 #[pyfunction]
 fn solve_day_03_pt_01(input: String) -> PyResult<i32> {
     Ok(Regex::new(r"mul\((?P<arg0>\d+)\,(?P<arg1>\d+)\)")
@@ -117,10 +127,10 @@ fn solve_day_03_pt_02(input: String) -> PyResult<i32> {
             .unwrap()
             .captures_iter(&input)
             .map(|m| {
-                if m.name("start").map_or("", |c| c.as_str()) != "" {
+                if m.has_group("start") {
                     capturing = true;
                     0
-                } else if m.name("stop").map_or("", |c| c.as_str()) != "" {
+                } else if m.has_group("stop") {
                     capturing = false;
                     0
                 } else if capturing {
