@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use regex::Regex;
 
 /// Formats the sum of two numbers as string.
 #[pyfunction]
@@ -99,6 +100,15 @@ fn solve_day_02_pt_02(input: String) -> PyResult<i32> {
     Ok(tally)
 }
 
+#[pyfunction]
+fn solve_day_03_pt_01(input: String) -> PyResult<i32> {
+    Ok(Regex::new(r"mul\((?P<arg0>\d+)\,(?P<arg1>\d+)\)")
+        .unwrap()
+        .captures_iter(&input)
+        .map(|m| m["arg0"].parse::<i32>().unwrap() * m["arg1"].parse::<i32>().unwrap())
+        .sum())
+}
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn aoc_2024(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -106,5 +116,6 @@ fn aoc_2024(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(solve_day_01_pt_02, m)?)?;
     m.add_function(wrap_pyfunction!(solve_day_02_pt_01, m)?)?;
     m.add_function(wrap_pyfunction!(solve_day_02_pt_02, m)?)?;
+    m.add_function(wrap_pyfunction!(solve_day_03_pt_01, m)?)?;
     Ok(())
 }
