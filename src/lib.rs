@@ -109,6 +109,30 @@ fn solve_day_03_pt_01(input: String) -> PyResult<i32> {
         .sum())
 }
 
+#[pyfunction]
+fn solve_day_03_pt_02(input: String) -> PyResult<i32> {
+    let mut capturing = true;
+    Ok(
+        Regex::new(r"(?:mul\((?P<arg0>\d+),(?P<arg1>\d+)\))|(?P<stop>don't\(\))|(?P<start>do\(\))")
+            .unwrap()
+            .captures_iter(&input)
+            .map(|m| {
+                if m.name("start").map_or("", |c| c.as_str()) != "" {
+                    capturing = true;
+                    0
+                } else if m.name("stop").map_or("", |c| c.as_str()) != "" {
+                    capturing = false;
+                    0
+                } else if capturing {
+                    m["arg0"].parse::<i32>().unwrap() * m["arg1"].parse::<i32>().unwrap()
+                } else {
+                    0
+                }
+            })
+            .sum(),
+    )
+}
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn aoc_2024(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -117,5 +141,6 @@ fn aoc_2024(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(solve_day_02_pt_01, m)?)?;
     m.add_function(wrap_pyfunction!(solve_day_02_pt_02, m)?)?;
     m.add_function(wrap_pyfunction!(solve_day_03_pt_01, m)?)?;
+    m.add_function(wrap_pyfunction!(solve_day_03_pt_02, m)?)?;
     Ok(())
 }
