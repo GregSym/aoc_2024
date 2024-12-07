@@ -57,8 +57,8 @@ class Mask(list[list[str]]):
         return ["".join([self[j][i] for (i, j) in path]) for path in self.indeces]
 
     @property
-    def eval(self) -> bool:
-        return any([word == TARGET for word in self.words])
+    def eval(self) -> int:
+        return sum([word == TARGET for word in self.words])
 
 
 class Grid(list[Mask]):

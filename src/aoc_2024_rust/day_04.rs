@@ -6,7 +6,7 @@ trait MaskIter {
 }
 
 trait XmasEval {
-    fn eval_xmas(&self) -> bool;
+    fn eval_xmas(&self) -> i32;
 }
 
 trait XmasConversion {
@@ -26,18 +26,17 @@ impl MaskIter for Vec<Vec<&str>> {
             .zip(row2)
             .zip(row3)
             .map(|(((a, b), c), d)| vec![a, b.clone(), c.clone(), d.clone()]);
-        long_rows
-            .flat_map(|horizontal_slice| {
-                let mut collect_masks: Vec<Vec<Vec<&str>>> = vec![];
-                for i in 0..(self.len() - 3) {
-                    let mut vertical_slice: Vec<Vec<&str>> = vec![];
-                    for row in horizontal_slice.clone().into_iter() {
-                        vertical_slice.push(row[i..(i + 4)].to_vec());
-                    }
-                    collect_masks.push(vertical_slice);
+        long_rows.flat_map(|horizontal_slice| {
+            let mut collect_masks: Vec<Vec<Vec<&str>>> = vec![];
+            for i in 0..(self.len() - 3) {
+                let mut vertical_slice: Vec<Vec<&str>> = vec![];
+                for row in horizontal_slice.clone().into_iter() {
+                    vertical_slice.push(row[i..(i + 4)].to_vec());
                 }
-                collect_masks
-            })
+                collect_masks.push(vertical_slice);
+            }
+            collect_masks
+        })
     }
 }
 
@@ -73,12 +72,19 @@ impl XmasConversion for Vec<Vec<&str>> {
 }
 
 impl XmasEval for Vec<Vec<&str>> {
-    fn eval_xmas(&self) -> bool {
+    fn eval_xmas(&self) -> i32 {
         println!("{:?}", self);
-        self.mask_to_xmas().into_iter().any(|test| {
-            println!("{:?}", test);
-            test == "XMAS"
-        })
+        self.mask_to_xmas()
+            .into_iter()
+            .map(|test| {
+                println!("{:?}", test);
+                if test == "XMAS" {
+                    1
+                } else {
+                    0
+                }
+            })
+            .sum()
     }
 }
 
@@ -91,9 +97,7 @@ pub fn solve_day_04_pt_01(input: String) -> PyResult<i32> {
         .collect();
     let mut tally = 0;
     for mask in grid.iter_masks() {
-        if mask.eval_xmas() {
-            tally += 1;
-        }
+        tally += mask.eval_xmas();
     }
     Ok(tally)
 }
