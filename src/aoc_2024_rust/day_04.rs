@@ -11,6 +11,7 @@ trait XmasEval {
 
 trait XmasConversion {
     fn mask_to_xmas(&self) -> Vec<String>;
+    fn iter_paths(&self) -> impl Iterator<Item = Vec<(usize, usize)>>;
     fn str_from_iter_pair(&self, pairs: impl Iterator<Item = (usize, usize)>) -> String;
 }
 
@@ -48,25 +49,28 @@ impl XmasConversion for Vec<Vec<&str>> {
         }
         word
     }
-    fn mask_to_xmas(&self) -> Vec<String> {
-        let mut collect_concats: Vec<String> = vec![];
-        // handle the horizontals
+    fn iter_paths(&self) -> impl Iterator<Item = Vec<(usize, usize)>> {
+        let mut iter_paths_collected: Vec<Vec<(usize, usize)>> = vec![];
         for i in 0..4 {
-            collect_concats.push(self.str_from_iter_pair(vec![i, i, i, i].into_iter().zip(0..4)));
-            collect_concats
-                .push(self.str_from_iter_pair(vec![i, i, i, i].into_iter().zip((0..4).rev())));
+            iter_paths_collected.push(vec![i, i, i, i].into_iter().zip(0..4).collect());
+            iter_paths_collected.push(vec![i, i, i, i].into_iter().zip((0..4).rev()).collect());
         }
         // handle the verticals
         for i in 0..4 {
-            collect_concats.push(self.str_from_iter_pair((0..4).zip(vec![i, i, i, i].into_iter())));
-            collect_concats
-                .push(self.str_from_iter_pair(((0..4).rev()).zip(vec![i, i, i, i].into_iter())));
+            iter_paths_collected.push((0..4).zip(vec![i, i, i, i].into_iter()).collect());
+            iter_paths_collected.push((0..4).rev().zip(vec![i, i, i, i].into_iter()).collect());
         }
-        // handle diag
-        collect_concats.push(self.str_from_iter_pair((0..4).zip(0..4)));
-        collect_concats.push(self.str_from_iter_pair((0..4).rev().zip((0..4).rev())));
-        collect_concats.push(self.str_from_iter_pair((0..4).zip((0..4).rev())));
-        collect_concats.push(self.str_from_iter_pair(((0..4).rev()).zip(0..4)));
+        iter_paths_collected.push((0..4).zip(0..4).collect());
+        iter_paths_collected.push((0..4).rev().zip((0..4).rev()).collect());
+        iter_paths_collected.push((0..4).zip((0..4).rev()).collect());
+        iter_paths_collected.push(((0..4).rev()).zip(0..4).collect());
+        iter_paths_collected.into_iter()
+    }
+    fn mask_to_xmas(&self) -> Vec<String> {
+        let mut collect_concats: Vec<String> = vec![];
+        for paths in self.iter_paths() {
+            collect_concats.push(self.str_from_iter_pair(paths.into_iter()));
+        }
         collect_concats
     }
 }
