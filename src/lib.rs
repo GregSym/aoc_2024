@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 use regex::Regex;
+mod aoc_2024_rust;
 
 /// Formats the sum of two numbers as string.
 #[pyfunction]
@@ -152,5 +153,6 @@ fn aoc_2024(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(solve_day_02_pt_02, m)?)?;
     m.add_function(wrap_pyfunction!(solve_day_03_pt_01, m)?)?;
     m.add_function(wrap_pyfunction!(solve_day_03_pt_02, m)?)?;
+    m.add_function(wrap_pyfunction!(aoc_2024_rust::day_04::solve_day_04_pt_01, m)?)?;
     Ok(())
 }
