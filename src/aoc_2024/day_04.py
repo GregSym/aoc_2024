@@ -1,3 +1,4 @@
+import collections
 from typing import Generator, Self
 from aoc_2022.utils.day_handler import DayInterface
 from aoc_2022.utils.transforms import DataTransforms
@@ -16,26 +17,34 @@ MAMMMXMMMM
 MXMXAXMASX
 """
 
+test_alt = """..X...
+.SAMX.
+.A..A.
+XMAS.S
+.X...."""
+
 
 @pytest.fixture
 def input():
     return test_input
 
 
+@pytest.fixture
+def input_alt():
+    return test_alt
+
+
 TARGET = "XMAS"
 
 
-class Mask(list[list[str]]):
+class Grid(collections.defaultdict[tuple[int, int], str]):
     @classmethod
-    def from_input(cls, input: list[str]) -> Generator[Self, None, None]:
-        for rows in zip(*[input[i:] for i in range(len(TARGET))]):
-            for i, c in enumerate(rows[0]):
-
-                def grab_horizontal_splits(row: str) -> list[str]:
-                    return [c for c in row[i : min(i + len(TARGET), len(row))]]
-
-                if len(grab_horizontal_splits(rows[0])) == len(TARGET):
-                    yield cls([grab_horizontal_splits(row) for row in rows])
+    def from_input(cls, text: list[str]) -> Self:
+        default_dict = cls(lambda: "")
+        default_dict.update(
+            {(x, y): c for y, row in enumerate(text) for x, c in enumerate(row)}
+        )
+        return default_dict
 
     @property
     def indeces(self) -> Generator[list[tuple[int, int]], None, None]:
@@ -52,23 +61,28 @@ class Mask(list[list[str]]):
         yield [(i, j) for (i, j) in zip(inc, dec)]
         yield [(i, j) for (i, j) in zip(dec, inc)]
 
-    @property
-    def words(self) -> list[str]:
-        return ["".join([self[j][i] for (i, j) in path]) for path in self.indeces]
+    def coords(self, x: int, y: int) -> Generator[list[tuple[int, int]], None, None]:
+        for path in self.indeces:
+            yield [(x + x_offset, y + y_offset) for x_offset, y_offset in path]
+
+    def words_at(
+        self, x: int, y: int
+    ) -> Generator[tuple[frozenset[tuple[int, int]], str]]:
+        for path in self.coords(x=x, y=y):
+            yield frozenset(path), "".join([self.get((x, y), "") for x, y in path])
 
     @property
-    def eval(self) -> int:
-        return sum([word == TARGET for word in self.words])
-
-
-class Grid(list[Mask]):
-    @classmethod
-    def from_input(cls, input: list[str]) -> Self:
-        return cls([mask for mask in Mask.from_input(input=input)])
-
+    def target_words(self) -> set[tuple[frozenset[tuple[int, int]], str]]:
+        return {
+            (path, word)
+            for k in self
+            for path, word in self.words_at(*k)
+            if word == TARGET
+        }
+    
     @property
     def xmas_count(self) -> int:
-        return sum([mask.eval for mask in self])
+        return len(self.target_words)
 
 
 def solve_day(input: str) -> int:
@@ -86,6 +100,14 @@ def test_day_4_part_1(input: str) -> None:
     ), f"{result=} alt solution {Grid.from_input(DataTransforms(input).lines).xmas_count}"
 
 
+def test_day_4_part_1_alt(input_alt: str) -> None:
+    # test solution to part 1
+    result = solve_day(input_alt)
+    assert (
+        4 == result
+    ), f"{result=} alt solution {Grid.from_input(DataTransforms(input_alt).lines).xmas_count}"
+
+
 # def test_day_4_part_2(input: str) -> None:
 #    # test solution to part 2
 #    assert 19 == solve_day(input)
@@ -94,5 +116,6 @@ def test_day_4_part_1(input: str) -> None:
 if __name__ == "__main__":
     real_input = DayInterface(4).get_day()
     test_day_4_part_1(test_input)
+    test_day_4_part_1_alt(test_alt)
     # test_day_4_part_2(test_input)
     print(DayInterface(4).submit_day(solve_day(real_input)))

@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use pyo3::prelude::*;
 
 trait MaskIter {
@@ -10,7 +12,7 @@ trait XmasEval {
 }
 
 trait XmasConversion {
-    fn mask_to_xmas(&self) -> Vec<String>;
+    fn mask_to_xmas(&self) -> HashMap<String, HashSet<Vec<(usize, usize)>>>;
     fn iter_paths(&self) -> impl Iterator<Item = Vec<(usize, usize)>>;
     fn str_from_iter_pair(&self, pairs: impl Iterator<Item = (usize, usize)>) -> String;
 }
@@ -49,6 +51,7 @@ impl XmasConversion for Vec<Vec<&str>> {
         }
         word
     }
+
     fn iter_paths(&self) -> impl Iterator<Item = Vec<(usize, usize)>> {
         let mut iter_paths_collected: Vec<Vec<(usize, usize)>> = vec![];
         for i in 0..4 {
@@ -66,10 +69,16 @@ impl XmasConversion for Vec<Vec<&str>> {
         iter_paths_collected.push(((0..4).rev()).zip(0..4).collect());
         iter_paths_collected.into_iter()
     }
-    fn mask_to_xmas(&self) -> Vec<String> {
-        let mut collect_concats: Vec<String> = vec![];
+
+    fn mask_to_xmas(&self) -> HashMap<String, HashSet<Vec<(usize, usize)>>> {
+        let mut collect_concats: HashMap<String, HashSet<Vec<(usize, usize)>>> = HashMap::new();
         for paths in self.iter_paths() {
-            collect_concats.push(self.str_from_iter_pair(paths.into_iter()));
+            let paths_copy = paths.clone();
+            let word = self.str_from_iter_pair(paths.into_iter());
+            if !collect_concats.contains_key(&word) {
+                collect_concats.insert(word, HashSet::new());
+            }
+            collect_concats[word].to_owned().insert(paths_copy);
         }
         collect_concats
     }
@@ -77,12 +86,17 @@ impl XmasConversion for Vec<Vec<&str>> {
 
 impl XmasEval for Vec<Vec<&str>> {
     fn eval_xmas(&self) -> i32 {
+        // println!("{:?}", self);
+        let mut local_tally = 0;
         println!("{:?}", self);
         self.mask_to_xmas()
             .into_iter()
             .map(|test| {
                 println!("{:?}", test);
                 if test == "XMAS" {
+                    println!("{:?}", self);
+                    local_tally += 1;
+                    println!("{:?}", local_tally);
                     1
                 } else {
                     0
