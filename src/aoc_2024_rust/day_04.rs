@@ -34,7 +34,7 @@ fn paths_x() -> Vec<Vec<((usize, usize), (usize, usize))>> {
     let right_down = inc.clone().zip(inc.clone());
     let right_up = dec.clone().zip(inc.clone());
     let left_up = dec.clone().zip(dec.clone());
-    let left_down = dec.clone().zip(inc.clone());
+    let left_down = inc.clone().zip(dec.clone());
     path_collection.push(right_down.clone().zip(right_up.clone()).collect());
     path_collection.push(left_down.clone().zip(left_up.clone()).collect());
     path_collection.push(right_down.clone().zip(left_down.clone()).collect());
@@ -147,6 +147,7 @@ impl XmasGrid2 for Vec<Vec<&str>> {
             row.into_iter().enumerate().for_each(|(x, _)| {
                 self.double_words_at(x, y)
                     .for_each(|(path_combo, (word_0, word_1))| {
+                        println!("{}, {}", word_0, word_1);
                         if word_0 == TARGET_MAS && word_1 == TARGET_MAS {
                             word_collection.insert((path_combo, (word_0, word_1)));
                         }

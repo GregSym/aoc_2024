@@ -1,4 +1,5 @@
 import collections
+from turtle import right
 from typing import Generator, Self
 from aoc_2022.utils.day_handler import DayInterface
 from aoc_2022.utils.transforms import DataTransforms
@@ -66,13 +67,17 @@ class Grid(collections.defaultdict[tuple[int, int], str]):
     def indeces_x(self) -> Generator[list[tuple[tuple[int, int], tuple[int, int]]]]:
         inc = [i for i in range(len(TARGET_MAS))]
         dec = [i for i in range(len(TARGET_MAS) - 1, -1, -1)]
-        yield [(i, j) for (i, j) in zip(zip(inc, inc), zip(inc, dec))]
-        yield [(i, j) for (i, j) in zip(zip(dec, inc), zip(dec, dec))]
+        right_down = zip(inc, inc)
+        right_up = zip(dec, inc)
+        left_down = zip(inc, dec)
+        left_up = zip(dec, dec)
+        yield [(i, j) for (i, j) in zip(right_down, right_up)]
+        yield [(i, j) for (i, j) in zip(left_down, left_up)]
         # yield [(i, j) for (i, j) in zip(zip(inc, inc), zip(dec, dec))]
-        yield [(i, j) for (i, j) in zip(zip(inc, inc), zip(dec, inc))]
+        yield [(i, j) for (i, j) in zip(right_down, left_down)]
         # yield [(i, j) for (i, j) in zip(zip(dec, inc), zip(dec, inc))]
         # yield [(i, j) for (i, j) in zip(zip(inc, dec), zip(dec, inc))]
-        yield [(i, j) for (i, j) in zip(zip(dec, dec), zip(dec, inc))]
+        yield [(i, j) for (i, j) in zip(right_up, left_up)]
 
     def coords(self, x: int, y: int) -> Generator[list[tuple[int, int]], None, None]:
         for path in self.indeces:
@@ -169,6 +174,8 @@ def test_day_4_part_2(input: str) -> None:
     # test solution to part 2
     info = DataTransforms(input).lines  # manipulate input per usecase
     solution = solve_day_2(input)
+    alt_solution = Grid.from_input(info).mas_count
+    assert 9 == alt_solution, f"{alt_solution=}"
     assert 9 == solution, f"{solution=} alt solution {Grid.from_input(info).mas_count=}"
 
 
