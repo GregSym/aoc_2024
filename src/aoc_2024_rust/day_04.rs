@@ -142,7 +142,7 @@ impl XmasGrid2 for Vec<Vec<&str>> {
     fn target_words_mas(
         &self,
     ) -> HashSet<(Vec<((usize, usize), (usize, usize))>, (String, String))> {
-        let mut word_collection = HashSet::new();
+        let mut word_collection: HashSet<(Vec<((usize, usize), (usize, usize))>, (String, String))> = HashSet::new();
         self.into_iter().enumerate().for_each(|(y, row)| {
             row.into_iter().enumerate().for_each(|(x, _)| {
                 self.double_words_at(x, y)

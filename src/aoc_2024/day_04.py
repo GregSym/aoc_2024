@@ -35,6 +35,7 @@ def input_alt():
 
 
 TARGET = "XMAS"
+TARGET_MAS = "MAS"
 
 
 class Grid(collections.defaultdict[tuple[int, int], str]):
@@ -61,15 +62,47 @@ class Grid(collections.defaultdict[tuple[int, int], str]):
         yield [(i, j) for (i, j) in zip(inc, dec)]
         yield [(i, j) for (i, j) in zip(dec, inc)]
 
+    @property
+    def indeces_x(self) -> Generator[list[tuple[tuple[int, int], tuple[int, int]]]]:
+        inc = [i for i in range(len(TARGET_MAS))]
+        dec = [i for i in range(len(TARGET_MAS) - 1, -1, -1)]
+        yield [(i, j) for (i, j) in zip(zip(inc, inc), zip(inc, dec))]
+        yield [(i, j) for (i, j) in zip(zip(dec, inc), zip(dec, dec))]
+        # yield [(i, j) for (i, j) in zip(zip(inc, inc), zip(dec, dec))]
+        yield [(i, j) for (i, j) in zip(zip(inc, inc), zip(dec, inc))]
+        # yield [(i, j) for (i, j) in zip(zip(dec, inc), zip(dec, inc))]
+        # yield [(i, j) for (i, j) in zip(zip(inc, dec), zip(dec, inc))]
+        yield [(i, j) for (i, j) in zip(zip(dec, dec), zip(dec, inc))]
+
     def coords(self, x: int, y: int) -> Generator[list[tuple[int, int]], None, None]:
         for path in self.indeces:
             yield [(x + x_offset, y + y_offset) for x_offset, y_offset in path]
+
+    def coords_x(
+        self, x: int, y: int
+    ) -> Generator[list[tuple[tuple[int, int], tuple[int, int]]], None, None]:
+        for path_combo in self.indeces_x:
+            yield [
+                ((x + x_offset, y + y_offset), (x + x_offset1, y + y_offset1))
+                for (x_offset, y_offset), (x_offset1, y_offset1) in path_combo
+            ]
 
     def words_at(
         self, x: int, y: int
     ) -> Generator[tuple[frozenset[tuple[int, int]], str]]:
         for path in self.coords(x=x, y=y):
             yield frozenset(path), "".join([self.get((x, y), "") for x, y in path])
+
+    def words_at_x(
+        self, x: int, y: int
+    ) -> Generator[
+        tuple[frozenset[tuple[tuple[int, int], tuple[int, int]]], tuple[str, str]]
+    ]:
+        for path_combo in self.coords_x(x=x, y=y):
+            yield frozenset(path_combo), (
+                "".join([self.get((x0, y0), "") for (x0, y0), (x1, y1) in path_combo]),
+                "".join([self.get((x1, y1), "") for (x0, y0), (x1, y1) in path_combo]),
+            )
 
     @property
     def target_words(self) -> set[tuple[frozenset[tuple[int, int]], str]]:
@@ -81,8 +114,25 @@ class Grid(collections.defaultdict[tuple[int, int], str]):
         }
 
     @property
+    def target_words_x(
+        self,
+    ) -> set[
+        tuple[frozenset[tuple[tuple[int, int], tuple[int, int]]], tuple[str, str]]
+    ]:
+        return {
+            (path_combo, (word_0, word_1))
+            for k in self
+            for path_combo, (word_0, word_1) in self.words_at_x(*k)
+            if word_0 == TARGET_MAS and word_1 == TARGET_MAS
+        }
+
+    @property
     def xmas_count(self) -> int:
         return len(self.target_words)
+
+    @property
+    def mas_count(self) -> int:
+        return len(self.target_words_x)
 
 
 def solve_day(input: str) -> int:
@@ -117,8 +167,9 @@ def test_day_4_part_1_alt(input_alt: str) -> None:
 
 def test_day_4_part_2(input: str) -> None:
     # test solution to part 2
+    info = DataTransforms(input).lines  # manipulate input per usecase
     solution = solve_day_2(input)
-    assert 9 == solution, f"{solution=}"
+    assert 9 == solution, f"{solution=} alt solution {Grid.from_input(info).mas_count=}"
 
 
 if __name__ == "__main__":
