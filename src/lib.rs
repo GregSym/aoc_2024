@@ -155,5 +155,6 @@ fn aoc_2024(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(solve_day_03_pt_02, m)?)?;
     m.add_function(wrap_pyfunction!(aoc_2024_rust::day_04::solve_day_04_pt_01, m)?)?;
     m.add_function(wrap_pyfunction!(aoc_2024_rust::day_04::solve_day_04_pt_02, m)?)?;
+    m.add_function(wrap_pyfunction!(aoc_2024_rust::day_05::solve_day_05_pt_01, m)?)?;
     Ok(())
 }

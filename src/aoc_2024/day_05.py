@@ -1,5 +1,6 @@
 from aoc_2022.utils.day_handler import DayInterface
 from aoc_2022.utils.transforms import DataTransforms
+from aoc_2024.aoc_2024 import solve_day_05_pt_01
 import pytest
 
 test_input = """47|53
@@ -40,7 +41,7 @@ def input():
 def solve_day(input: str) -> int:
     info = DataTransforms(input).lines  # manipulate input per usecase
     # solve
-    return 0
+    return solve_day_05_pt_01(input)
 
 
 def test_day_5_part_1(input: str) -> None:
