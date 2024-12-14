@@ -5,13 +5,13 @@ use pyo3::{pyfunction, PyResult};
 use super::solve::Solution;
 
 struct PageOrdering {
-    rules: HashMap<i32, i32>,
+    rules: HashMap<i32, Vec<i32>>,
     pages: Vec<Vec<i32>>,
 }
 
 impl PageOrdering {
     fn new(input: String) -> Self {
-        let mut rules = HashMap::new();
+        let mut rules: HashMap<i32, Vec<i32>> = HashMap::new();
         let mut pages: Vec<Vec<i32>> = vec![];
         for line in input.split_terminator("\n") {
             if line.contains("|") {
@@ -19,7 +19,11 @@ impl PageOrdering {
                     .split_terminator("|")
                     .map(|num| num.parse::<i32>().unwrap())
                     .collect();
-                rules.insert(pair[0], pair[1]);
+                if rules.contains_key(&pair[0]) {
+                    rules.get_mut(&pair[0]).unwrap().push(pair[1]);
+                } else {
+                    rules.insert(pair[0], vec![pair[1]]);
+                }
             }
             if line.contains(",") {
                 let page = line
@@ -41,11 +45,23 @@ impl PageOrdering {
             .into_iter()
             .filter(|row| {
                 row.clone().into_iter().enumerate().all(|(i, page)| {
-                    row.clone().split_off(i).into_iter().all(|subsequent_page| {
-                        (self.rules.contains_key(&subsequent_page)
-                            && self.rules[&subsequent_page] != page)
-                            || !self.rules.contains_key(&subsequent_page)
-                    })
+                    let mut copied_row = row.clone();
+                    if i == row.len() && self.rules.contains_key(&page) {
+                        return self.rules[&page]
+                            .clone()
+                            .into_iter()
+                            .all(|must_go_after| !copied_row.contains(&must_go_after));
+                    }
+                    let subsequent_slice = copied_row.split_off(i + 1);
+                    if self.rules.contains_key(&page) {
+                        println!("{:?}", subsequent_slice);
+                        return self.rules[&page].clone().into_iter().all(|must_go_after| {
+                            subsequent_slice.contains(&must_go_after)
+                                || !copied_row.contains(&must_go_after)
+                        });
+                    } else {
+                        return true;
+                    }
                 })
             })
             .collect()

@@ -46,7 +46,7 @@ def solve_day(input: str) -> int:
 
 def test_day_5_part_1(input: str) -> None:
     # test solution to part 1
-    assert 143 == solve_day(input)
+    assert 143 == solve_day(input), f"{solve_day(input)=}"
 
 
 # def test_day_5_part_2(input: str) -> None:
