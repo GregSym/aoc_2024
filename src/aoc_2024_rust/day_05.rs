@@ -67,9 +67,29 @@ impl PageOrdering {
             .collect()
     }
 
+    fn incorrectly_ordered_pages(&self) -> Vec<Vec<i32>> {
+        self.pages
+            .clone()
+            .into_iter()
+            .filter(|row| !self.correctly_ordered_pages().contains(row))
+            .collect()
+    }
+
+    fn corrected_pages(&self) -> Vec<Vec<i32>> {
+        self.incorrectly_ordered_pages()
+    }
+
     fn middles(&self) -> Vec<i32> {
         self.correctly_ordered_pages()
             .into_iter()
+            .map(|row| row[usize::from(row.len() / 2)])
+            .collect()
+    }
+
+    fn middles_corrected(&self) -> Vec<i32> {
+        self.correctly_ordered_pages()
+            .into_iter()
+            .chain(self.corrected_pages().into_iter())
             .map(|row| row[usize::from(row.len() / 2)])
             .collect()
     }
@@ -79,9 +99,18 @@ impl Solution for PageOrdering {
     fn solve(&self) -> PyResult<i32> {
         Ok(self.middles().into_iter().sum())
     }
+
+    fn solve_02(&self) -> PyResult<i32> {
+        Ok(self.middles_corrected().into_iter().sum())
+    }
 }
 
 #[pyfunction]
 pub fn solve_day_05_pt_01(input: String) -> PyResult<i32> {
     return PageOrdering::new(input).solve();
+}
+
+#[pyfunction]
+pub fn solve_day_05_pt_02(input: String) -> PyResult<i32> {
+    return PageOrdering::new(input).solve_02();
 }
