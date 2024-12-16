@@ -75,8 +75,63 @@ impl PageOrdering {
             .collect()
     }
 
+    fn indeces_to_swap(&self) -> Vec<Vec<usize>> {
+        self.incorrectly_ordered_pages()
+            // .clone()
+            .into_iter()
+            .map(|row| {
+                row.clone()
+                    .into_iter()
+                    .enumerate()
+                    .map(|(i, page)| {
+                        let mut copied_row = row.clone();
+                        if i == row.len() && self.rules.contains_key(&page) {
+                            if !self.rules[&page]
+                                .clone()
+                                .into_iter()
+                                .all(|must_go_after| !copied_row.contains(&must_go_after))
+                            {
+                                return i;
+                            } else {
+                                return 55000;
+                            }
+                        }
+                        let subsequent_slice = copied_row.split_off(i + 1);
+                        if self.rules.contains_key(&page) {
+                            println!("{:?}", subsequent_slice);
+                            if !self.rules[&page].clone().into_iter().all(|must_go_after| {
+                                subsequent_slice.contains(&must_go_after)
+                                    || !copied_row.contains(&must_go_after)
+                            }) {
+                                return i;
+                            } else {
+                                return 55000;
+                            }
+                        } else {
+                            return 55000;
+                        }
+                    })
+                    .filter(|indeces| *indeces != 55000)
+                    .collect()
+            })
+            .filter(|index_row: &Vec<usize>| index_row.len() != 0)
+            .collect()
+    }
+
     fn corrected_pages(&self) -> Vec<Vec<i32>> {
         self.incorrectly_ordered_pages()
+            .into_iter()
+            .zip(self.indeces_to_swap())
+            .map(|(row, left_right)| {
+                let mut rearranged = row;
+                if left_right.len() > 1 {
+                    println!("{:?}", rearranged);
+                    println!("{:?}", left_right);
+                    rearranged.swap(left_right[0], left_right[1]);
+                }
+                rearranged
+            })
+            .collect()
     }
 
     fn middles(&self) -> Vec<i32> {

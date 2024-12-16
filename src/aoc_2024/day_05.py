@@ -1,6 +1,6 @@
 from aoc_2022.utils.day_handler import DayInterface
 from aoc_2022.utils.transforms import DataTransforms
-from aoc_2024.aoc_2024 import solve_day_05_pt_01
+from aoc_2024.aoc_2024 import solve_day_05_pt_01, solve_day_05_pt_02
 import pytest
 
 test_input = """47|53
@@ -38,10 +38,13 @@ def input():
     return test_input
 
 
-def solve_day(input: str) -> int:
+def solve_day(input: str, part: int = 1) -> int:
     info = DataTransforms(input).lines  # manipulate input per usecase
-    # solve
-    return solve_day_05_pt_01(input)
+    if part == 1:
+        # solve
+        return solve_day_05_pt_01(input)
+    else:
+        return solve_day_05_pt_02(input)
 
 
 def test_day_5_part_1(input: str) -> None:
@@ -49,13 +52,14 @@ def test_day_5_part_1(input: str) -> None:
     assert 143 == solve_day(input), f"{solve_day(input)=}"
 
 
-# def test_day_5_part_2(input: str) -> None:
-#    # test solution to part 2
-#    assert 19 == solve_day(input)
+def test_day_5_part_2(input: str) -> None:
+   # test solution to part 2
+   assert 123 == solve_day(input, part=2)
 
 
 if __name__ == "__main__":
     real_input = DayInterface(5).get_day()
     test_day_5_part_1(test_input)
-    # test_day_5_part_2(test_input)
+    test_day_5_part_2(test_input)
     print(DayInterface(5).submit_day(solve_day(real_input)))
+    print(DayInterface(5).submit_day(solve_day(real_input, part=2), part=2))
