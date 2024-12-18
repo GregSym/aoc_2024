@@ -54,7 +54,7 @@ impl PageOrdering {
                     }
                     let subsequent_slice = copied_row.split_off(i + 1);
                     if self.rules.contains_key(&page) {
-                        println!("{:?}", subsequent_slice);
+                        // println!("{:?}", subsequent_slice);
                         return self.rules[&page].clone().into_iter().all(|must_go_after| {
                             subsequent_slice.contains(&must_go_after)
                                 || !copied_row.contains(&must_go_after)
@@ -75,7 +75,7 @@ impl PageOrdering {
             .collect()
     }
 
-    fn indeces_to_swap(&self) -> Vec<Vec<usize>> {
+    fn indeces_to_swap(&self) -> Vec<Vec<(usize, Vec<usize>)>> {
         self.incorrectly_ordered_pages()
             // .clone()
             .into_iter()
@@ -91,34 +91,48 @@ impl PageOrdering {
                                 .into_iter()
                                 .all(|must_go_after| !copied_row.contains(&must_go_after))
                             {
-                                return i;
+                                return (
+                                    i,
+                                    self.rules
+                                        .get_mut(&page)
+                                        .unwrap()
+                                        .into_iter()
+                                        .map(|after| row.into_iter().position(after).unwrap()),
+                                );
                             } else {
-                                return 55000;
+                                return (55000, vec![55000]);
                             }
                         }
                         let subsequent_slice = copied_row.split_off(i + 1);
                         if self.rules.contains_key(&page) {
-                            println!("{:?}", subsequent_slice);
+                            // println!("{:?}", subsequent_slice);
                             if !self.rules[&page].clone().into_iter().all(|must_go_after| {
                                 subsequent_slice.contains(&must_go_after)
                                     || !copied_row.contains(&must_go_after)
                             }) {
-                                return i;
+                                return (
+                                    i,
+                                    self.rules.get_mut(&page).unwrap().into_iter().map(|after| {
+                                        subsequent_slice.into_iter().position(after).unwrap() + i
+                                    }).collect()
+                                );
                             } else {
-                                return 55000;
+                                return (55000, vec![55000]);
                             }
                         } else {
-                            return 55000;
+                            return (55000, vec![55000]);
                         }
                     })
-                    .filter(|indeces| *indeces != 55000)
+                    .filter(|indeces| (*indeces).0 != 55000)
                     .collect()
             })
-            .filter(|index_row: &Vec<usize>| index_row.len() != 0)
+            .filter(|index_row: &Vec<(usize, usize)>| index_row.len() != 0)
             .collect()
     }
 
     fn corrected_pages(&self) -> Vec<Vec<i32>> {
+        println!("{:?}", self.incorrectly_ordered_pages());
+        println!("{:?}", self.indeces_to_swap());
         self.incorrectly_ordered_pages()
             .into_iter()
             .zip(self.indeces_to_swap())
@@ -127,7 +141,11 @@ impl PageOrdering {
                 if left_right.len() > 1 {
                     println!("{:?}", rearranged);
                     println!("{:?}", left_right);
-                    rearranged.swap(left_right[0], left_right[1]);
+                    for pair in left_right {
+                        for after_position in pair.1 {
+                            rearranged.swap(pair.0, after_position);
+                        }
+                    }
                 }
                 rearranged
             })
